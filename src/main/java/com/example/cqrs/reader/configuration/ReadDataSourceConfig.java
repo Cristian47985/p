@@ -1,5 +1,6 @@
 package com.example.cqrs.reader.configuration;
 
+import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
@@ -30,22 +32,27 @@ import java.util.Objects;
         entityManagerFactoryRef = "readEntityManagerFactory",
         transactionManagerRef = "readTransactionManager"
 )
+
 public class ReadDataSourceConfig {
 
         @Value("${spring.jpa.datasource-platform}")
         private String dialect;
+        @Value("${spring.datasource.read.url}")
+        private String databaseUrl;
 
         @Bean(name = "readDataSource")
         @ConfigurationProperties(prefix = "spring.datasource.read")
         public DataSource dataSource() {
-                return DataSourceBuilder.create().build();
+                return DataSourceBuilder.create().url(databaseUrl).build();
         }
+
 
         @Bean(name = "readEntityManagerFactory")
         public LocalContainerEntityManagerFactoryBean entityManagerFactory(
                 EntityManagerFactoryBuilder builder,
                 @Qualifier("readDataSource") DataSource dataSource
         ) {
+
                 LocalContainerEntityManagerFactoryBean factoryBean = builder
                         .dataSource(dataSource)
                         .packages("com.example.cqrs.reader.persistence") // Paquete con las entidades de lectura

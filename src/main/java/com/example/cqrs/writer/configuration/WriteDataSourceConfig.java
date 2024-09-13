@@ -1,5 +1,6 @@
 package com.example.cqrs.writer.configuration;
 
+import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,16 +28,20 @@ import java.util.Map;
         entityManagerFactoryRef = "writeEntityManagerFactory",
         transactionManagerRef = "writeTransactionManager"
 )
+
+
 public class WriteDataSourceConfig  {
         @Primary
         @Bean(name = "writeDataSource")
         @ConfigurationProperties(prefix = "spring.datasource.write")
         public DataSource dataSource() {
-            return DataSourceBuilder.create().build();
+            return DataSourceBuilder.create().url(databaseUrl).build();
         }
 
         @Value("${spring.jpa.datasource-platform}")
         private String dialect;
+        @Value("${spring.datasource.write.url}")
+        private String databaseUrl;
 
         @Primary
         @Bean(name = "writeEntityManagerFactory")
